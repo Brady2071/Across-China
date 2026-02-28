@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  <title>踏破中国34个省级行政区！</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .container { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; max-width: 1600px; margin: 0 auto; }
+    h1 { width: 100%; margin: 0 0 16px; font-size: 1.5rem; }
+    #exportArea { display: flex; gap: 24px; align-items: flex-start; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    #map-wrap { flex-shrink: 0; max-width: 100%; }
+    #mapSvged { border: 1px solid #ccc; max-width: 100%; height: auto; }
+    #地区 path { fill: #FFF; cursor: pointer; touch-action: manipulation; transition: filter .15s; fill-rule: evenodd; clip-rule: evenodd; stroke: #000; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    #地区 path:hover { filter: brightness(0.9); }
+    #地区 path[data-level="5"] { fill: #dc3545; }
+    #地区 path[data-level="4"] { fill: #ffc107; }
+    #地区 path[data-level="3"] { fill: #28a745; }
+    #地区 path[data-level="2"] { fill: #007bff; }
+    #地区 path[data-level="1"] { fill: #87ceeb; }
+    #地区 path[data-level="0"] { fill: #FFF; }
+    #地名 text { pointer-events: none; }
+    .sidebar { min-width: 200px; }
+    .legend { background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); margin-bottom: 16px; }
+    .legend h3 { margin: 0 0 12px; font-size: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+    .legend-color { width: 24px; height: 24px; border: 1px solid #333; flex-shrink: 0; }
+    .actions { background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .actions button { padding: 10px 20px; font-size: 14px; cursor: pointer; background: #1890ff; color: #fff; border: none; border-radius: 6px; }
+    .actions button:hover { background: #40a9ff; }
+    #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; align-items: center; justify-content: center; }
+    #modal.show { display: flex; }
+    .modal-content { background: #fff; padding: 24px; border-radius: 8px; min-width: 280px; }
+    .modal-content h3 { margin: 0 0 16px; font-size: 16px; }
+    .modal-content .opt { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px; margin-bottom: 6px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 14px; text-align: left; }
+    .modal-content .opt:hover { background: #f0f0f0; }
+    .modal-content .opt-color { width: 24px; height: 24px; border: 1px solid #333; flex-shrink: 0; }
+    @media (max-width: 768px) {
+      * { -webkit-tap-highlight-color: transparent; }
+      body { padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); -webkit-text-size-adjust: 100%; }
+      .container { gap: 16px; }
+      h1 { font-size: 1.25rem; margin-bottom: 12px; }
+      #exportArea { flex-direction: column; padding: 12px; gap: 16px; }
+      #map-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      #mapSvged { width: 100%; height: auto; max-width: 100%; }
+      .sidebar { min-width: 0; width: 100%; }
+      .legend { margin-bottom: 0; padding: 12px; }
+      .legend h3 { font-size: 13px; }
+      .legend-item { font-size: 12px; }
+      .actions { padding: 12px; }
+      .actions button { padding: 12px 20px; min-height: 44px; font-size: 15px; touch-action: manipulation; }
+      #modal { padding: 0; align-items: flex-end; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      .modal-content { width: 100%; max-width: none; margin: 0; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); border-radius: 12px 12px 0 0; max-height: 80vh; overflow-y: auto; }
+      .modal-content h3 { font-size: 15px; margin-bottom: 16px; }
+      .modal-content .opt { padding: 14px; min-height: 48px; font-size: 15px; touch-action: manipulation; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>踏破中国34个省级行政区！</h1>
+    <div id="exportArea">
+      <div id="map-wrap">
+        <svg id="mapSvged" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1134 976" width="850" height="732">
+          <g id="地区">
+            <path id="黑龙江" d="M1100,33v158H894V33H1100z"/>
+            <path id="甘肃" d="M585,191v371H351V191H585z"/>
+            <path id="吉林" d="M894,191v85h206v-85H894z"/>
+            <path id="内蒙古" d="M894,33H738v158H499v227h227l168-108V33z"/>
+            <path id="山东" d="M779,446v92h100v-46h39v-46h-139v-92H779z"/>
+            <path id="河北" d="M861,310H726v180h117v-95h18V310z"/>
+            <path id="北京" d="M763 336h80v52H763Z"/>
+            <path id="天津" d="M763,388h80v43h-80V388z"/>
+            <path id="西藏" d="M389,770H35V466h354V770z"/>
+            <path id="新疆" d="M35,466V87h316v379H35z"/>
+            <path id="河南" d="M779,490H654v117h125V490z"/>
+            <path id="安徽" d="M852,538h-73v138h73V538z"/>
+            <path id="山西" d="M654,418v108h72V418H654z"/>
+            <path id="湖北" d="M779,688v-81H654v81H779z"/>
+            <path id="青海" d="M442,626V395H228v231H442z"/>
+            <path id="辽宁" d="M861,276v80h80v39h74v-119H861z"/>
+            <path id="广东" d="M823,788H679v81h144V788z"/>
+            <path id="江苏" d="M899,538v87h-62v-87H899z"/>
+            <path id="江西" d="M852,806V676H749v130H852z"/>
+            <path id="浙江" d="M852,625l74,1v107h-74V625z"/>
+            <path id="福建" d="M823,733v107h73V733H823z"/>
+            <path id="上海" d="M882 602h72v47H882Z"/>
+            <path id="陕西" d="M585,653h69V418h-69V653z"/>
+            <path id="湖南" d="M654,688h95v100h-95V688z"/>
+            <path id="广西" d="M679,788H537v81h142V788z"/>
+            <path id="澳门" d="M690,848h60v42H690V848z"/>
+            <path id="香港" d="M756,848h64v42H756V848z"/>
+            <path id="贵州" d="M654,709H537v79h117V709z"/>
+            <path id="重庆" d="M565 653h89v56H565Z"/>
+            <path id="四川" d="M565,737v-84h20v-91H389v175H565z"/>
+            <path id="云南" d="M537,737H389v115h148V737z"/>
+            <path id="宁夏" d="M585,418h-86v96h86V418z"/>
+            <path id="台湾" d="M918 788h45v87H918Z"/>
+            <path id="海南" d="M615 897h78v46H615Z"/>
+          </g>
+          <g id="地名">
+            <text x="659" y="266" fill="#111" font-size="30">内蒙古</text>
+            <text x="951" y="123" fill="#111" font-size="30">黑龙江</text>
+            <text x="966" y="242" fill="#111" font-size="30">吉林</text>
+            <text x="906" y="337" fill="#111" font-size="30">辽宁</text>
+            <text x="773" y="371" fill="#111" font-size="30">北京</text>
+            <text x="773" y="419" fill="#111" font-size="30">天津</text>
+            <text x="751" y="469" fill="#111" font-size="30">河北</text>
+            <text x="835" y="522" fill="#111" font-size="28" text-anchor="middle">山东</text>
+            <text x="685" y="579" fill="#111" font-size="30">河南</text>
+            <text x="684" y="658" fill="#111" font-size="30">湖北</text>
+            <text x="684" y="733" fill="#111" font-size="30">湖</text>
+            <text x="684" y="763" fill="#111" font-size="30">南</text>
+            <text x="846" y="575" fill="#111" font-size="30">江</text>
+            <text x="846" y="605" fill="#111" font-size="30">苏</text>
+            <text x="888" y="635" fill="#111" font-size="30">上海</text>
+            <text x="872" y="685" fill="#111" font-size="30">浙</text>
+            <text x="872" y="715" fill="#111" font-size="30">江</text>
+            <text x="844" y="783" fill="#111" font-size="30">福</text>
+            <text x="844" y="813" fill="#111" font-size="30">建</text>
+            <text x="925" y="826" fill="#111" font-size="30">台</text>
+            <text x="925" y="856" fill="#111" font-size="30">湾</text>
+            <text x="625" y="930" fill="#111" font-size="30">海南</text>
+            <text x="721" y="842" fill="#111" font-size="30">广东</text>
+            <text x="772" y="736" fill="#111" font-size="30">江</text>
+            <text x="772" y="766" fill="#111" font-size="30">西</text>
+            <text x="793" y="603" fill="#111" font-size="30">安</text>
+            <text x="793" y="633" fill="#111" font-size="30">徽</text>
+            <text x="674" y="466" fill="#111" font-size="30">山</text>
+            <text x="674" y="496" fill="#111" font-size="30">西</text>
+            <text x="604" y="536" fill="#111" font-size="30">陕</text>
+            <text x="604" y="566" fill="#111" font-size="30">西</text>
+            <text x="527" y="460" fill="#111" font-size="30">宁</text>
+            <text x="527" y="490" fill="#111" font-size="30">夏</text>
+            <text x="411" y="304" fill="#111" font-size="30">甘</text>
+            <text x="411" y="334" fill="#111" font-size="30">肃</text>
+            <text x="301" y="520" fill="#111" font-size="30">青海</text>
+            <text x="453" y="660" fill="#111" font-size="30">四川</text>
+            <text x="432" y="805" fill="#111" font-size="30">云南</text>
+            <text x="579" y="839" fill="#111" font-size="30">广西</text>
+            <text x="566" y="759" fill="#111" font-size="30">贵州</text>
+            <text x="579" y="691" fill="#111" font-size="30">重庆</text>
+            <text x="104" y="639" fill="#111" font-size="30">西藏</text>
+            <text x="163" y="288" fill="#111" font-size="30">新疆</text>
+            <text x="720" y="878" fill="#111" font-size="22" text-anchor="middle">澳门</text>
+            <text x="788" y="878" fill="#111" font-size="22" text-anchor="middle">香港</text>
+          </g>
+        </svg>
+      </div>
+      <div class="sidebar">
+        <div class="legend">
+          <h3>停留程度说明</h3>
+          <div class="legend-item"><span class="legend-color" style="background:#dc3545"></span><span>定居</span></div>
+          <div class="legend-item"><span class="legend-color" style="background:#ffc107"></span><span>短居</span></div>
+          <div class="legend-item"><span class="legend-color" style="background:#28a745"></span><span>旅行/出差</span></div>
+          <div class="legend-item"><span class="legend-color" style="background:#007bff"></span><span>中转</span></div>
+          <div class="legend-item"><span class="legend-color" style="background:#87ceeb"></span><span>路过</span></div>
+          <div class="legend-item"><span class="legend-color" style="background:#fff;border:1px solid #333"></span><span>没去过</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" id="exportBtn">导出地图图片</button>
+    </div>
+  </div>
+  <div id="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">选择停留程度</h3>
+      <button class="opt" data-level="5"><span class="opt-color" style="background:#dc3545"></span><span>定居</span></button>
+      <button class="opt" data-level="4"><span class="opt-color" style="background:#ffc107"></span><span>短居</span></button>
+      <button class="opt" data-level="3"><span class="opt-color" style="background:#28a745"></span><span>旅行/出差</span></button>
+      <button class="opt" data-level="2"><span class="opt-color" style="background:#007bff"></span><span>中转</span></button>
+      <button class="opt" data-level="1"><span class="opt-color" style="background:#87ceeb"></span><span>路过</span></button>
+      <button class="opt" data-level="0"><span class="opt-color" style="background:#fff;border:1px solid #333"></span><span>没去过</span></button>
+    </div>
+  </div>
+  <script>
+    const state = {};
+    const svg = document.getElementById('mapSvged');
+    const paths = svg.querySelectorAll('#地区 path');
+    paths.forEach(p => {
+      const name = p.id;
+      state[name] = 0;
+      p.setAttribute('data-level', '0');
+    });
+
+    paths.forEach(p => {
+      p.addEventListener('click', () => {
+        const name = p.id;
+        modalTitle.textContent = name + ' - 选择停留程度';
+        modal.dataset.name = name;
+        modal.classList.add('show');
+      });
+    });
+
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    modal.querySelectorAll('.opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = modal.dataset.name;
+        const level = parseInt(btn.dataset.level, 10);
+        state[name] = level;
+        const path = document.getElementById(name);
+        path.setAttribute('data-level', String(level));
+        modal.classList.remove('show');
+      });
+    });
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      html2canvas(document.getElementById('exportArea'), { scale: 2, useCORS: true }).then(canvas => {
+        const a = document.createElement('a');
+        a.download = '踏破中国地图.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      });
+    });
+  </script>
+</body>
+</html>
